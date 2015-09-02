@@ -211,6 +211,8 @@ case "$1" in
     chmod 700 "$HOME/pass_$APP"
 
     manage_host "$private_ip" create "$database" "$admin_pw" "$new_password"
+
+	dokku config:set $APP "BROKER_URL=amqp://${database}:${new_password}@${private_ip}:${port}/${database}"
     ;;
   rabbitmq:delete)
     check_container
@@ -223,6 +225,7 @@ case "$1" in
     rm -f "$HOME/db_$APP"
     rm -f "$HOME/pass_$APP"
 
+	dokku config:unset "$APP" "BROKER_URL"
     ;;
 
   rabbitmq:list)
