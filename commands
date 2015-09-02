@@ -212,7 +212,7 @@ case "$1" in
 
     manage_host "$private_ip" create "$database" "$admin_pw" "$new_password"
 
-	dokku config:set $APP "BROKER_URL=amqp://${database}:${new_password}@${private_ip}:${port}/${database}"
+    dokku config:set $APP "BROKER_URL=$(db_url "$APP")"
     ;;
   rabbitmq:delete)
     check_container
@@ -225,7 +225,7 @@ case "$1" in
     rm -f "$HOME/db_$APP"
     rm -f "$HOME/pass_$APP"
 
-	dokku config:unset "$APP" "BROKER_URL"
+    dokku config:unset "$APP" "BROKER_URL"
     ;;
 
   rabbitmq:list)
@@ -337,6 +337,7 @@ case "$1" in
 
     if [[ ! -f "$HOME/link_$3" ]]; then
       echo "$APP" > "$HOME/link_$3"
+      dokku config:set $3 "BROKER_URL=$(db_url "$APP")"
 
       restart_app $3
     else
@@ -352,6 +353,8 @@ case "$1" in
     if [[ -f "$HOME/link_$APP" ]]; then
       rm -f "$HOME/link_$APP"
     fi
+
+    dokku config:unset "$APP" "BROKER_URL"
 
     restart_app $APP
     ;;
